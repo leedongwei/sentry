@@ -10,6 +10,9 @@ describe('ReleasesV2List', function() {
   const {organization, routerContext, router} = initializeOrg({
     organization: {features: ['releases-v2']},
   });
+
+  const thirdRelease = TestStubs.ReleaseV2({version: 'af4f231ec9a8'});
+
   const props = {
     router,
     organization,
@@ -34,7 +37,24 @@ describe('ReleasesV2List', function() {
       body: [
         TestStubs.ReleaseV2({version: '1.0.0'}),
         TestStubs.ReleaseV2({version: '1.0.1'}),
-        TestStubs.ReleaseV2({version: 'af4f231ec9a8'}, {hasHealthData: false}),
+        {
+          ...thirdRelease,
+          projects: [
+            {
+              ...thirdRelease.projects[0],
+              healthData: {
+                ...thirdRelease.projects[0].healthData,
+                hasHealthData: false,
+              },
+            },
+            {
+              id: 4383604,
+              name: 'Sentry-IOS-Shop',
+              slug: 'sentry-ios-shop',
+              healthData: thirdRelease.projects[0].healthData,
+            },
+          ],
+        },
       ],
     });
 

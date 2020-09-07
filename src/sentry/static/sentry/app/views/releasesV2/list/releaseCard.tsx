@@ -18,8 +18,8 @@ import Link from 'app/components/links/link';
 import Feature from 'app/components/acl/feature';
 import Tooltip from 'app/components/tooltip';
 
-import ReleaseHealth from './releaseHealth';
 import NotAvailable from './notAvailable';
+import ReleaseHealth from './releasehealth';
 import {getReleaseNewIssuesUrl} from '../utils';
 
 type Props = {
