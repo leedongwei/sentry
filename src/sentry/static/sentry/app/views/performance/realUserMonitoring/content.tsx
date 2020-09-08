@@ -4,31 +4,24 @@ import {browserHistory} from 'react-router';
 import styled from '@emotion/styled';
 import omit from 'lodash/omit';
 
-import {Organization, Project} from 'app/types';
-import {getParams} from 'app/components/organizations/globalSelectionHeader/getParams';
-import space from 'app/styles/space';
-import {generateQueryWithTag} from 'app/utils';
-import EventView from 'app/utils/discover/eventView';
 import CreateAlertButton from 'app/components/createAlertButton';
 import * as Layout from 'app/components/layouts/thirds';
-import Tags from 'app/views/eventsV2/tags';
-import SearchBar from 'app/views/events/searchBar';
+import {getParams} from 'app/components/organizations/globalSelectionHeader/getParams';
+import space from 'app/styles/space';
+import {Organization, Project} from 'app/types';
+import EventView from 'app/utils/discover/eventView';
 import {decodeScalar} from 'app/utils/queryString';
-import withProjects from 'app/utils/withProjects';
+import SearchBar from 'app/views/events/searchBar';
 
-import TransactionHeader, {Tab} from './header';
-import TransactionList from './transactionList';
-import UserStats from './userStats';
-import TransactionSummaryCharts from './charts';
-import RelatedIssues from './relatedIssues';
-import SidebarCharts from './sidebarCharts';
+import TransactionVitals from './transactionVitals';
+// import BaselineValues from './baselineValues';
+import TransactionHeader, {Tab} from '../transactionSummary/header';
 
 type Props = {
   location: Location;
   eventView: EventView;
   transactionName: string;
   organization: Organization;
-  totalValues: number | null;
   projects: Project[];
 };
 
@@ -36,7 +29,7 @@ type State = {
   incompatibleAlertNotice: React.ReactNode;
 };
 
-class SummaryContent extends React.Component<Props, State> {
+class RumContent extends React.Component<Props, State> {
   state: State = {
     incompatibleAlertNotice: null,
   };
@@ -58,16 +51,6 @@ class SummaryContent extends React.Component<Props, State> {
     });
   };
 
-  generateTagUrl = (key: string, value: string) => {
-    const {location} = this.props;
-    const query = generateQueryWithTag(location.query, {key, value});
-
-    return {
-      ...location,
-      query,
-    };
-  };
-
   handleIncompatibleQuery: React.ComponentProps<
     typeof CreateAlertButton
   >['onIncompatibleQuery'] = (incompatibleAlertNoticeFn, _errors) => {
@@ -78,14 +61,7 @@ class SummaryContent extends React.Component<Props, State> {
   };
 
   render() {
-    const {
-      transactionName,
-      location,
-      eventView,
-      organization,
-      projects,
-      totalValues,
-    } = this.props;
+    const {transactionName, location, eventView, projects, organization} = this.props;
     const {incompatibleAlertNotice} = this.state;
     const query = decodeScalar(location.query.query) || '';
 
@@ -97,14 +73,14 @@ class SummaryContent extends React.Component<Props, State> {
           organization={organization}
           projects={projects}
           transactionName={transactionName}
-          currentTab={Tab.TransactionSummary}
+          currentTab={Tab.RealUserMonitoring}
           handleIncompatibleQuery={this.handleIncompatibleQuery}
         />
         <Layout.Body>
           {incompatibleAlertNotice && (
             <Layout.Main fullWidth>{incompatibleAlertNotice}</Layout.Main>
           )}
-          <Layout.Main>
+          <Layout.Main fullWidth>
             <StyledSearchBar
               organization={organization}
               projectIds={eventView.project}
@@ -112,42 +88,12 @@ class SummaryContent extends React.Component<Props, State> {
               fields={eventView.fields}
               onSearch={this.handleSearch}
             />
-            <TransactionSummaryCharts
+            <TransactionVitals
               organization={organization}
               location={location}
               eventView={eventView}
-              totalValues={totalValues}
-            />
-            <TransactionList
-              organization={organization}
-              transactionName={transactionName}
-              location={location}
-              eventView={eventView}
-            />
-            <RelatedIssues
-              organization={organization}
-              location={location}
-              transaction={transactionName}
-              start={eventView.start}
-              end={eventView.end}
-              statsPeriod={eventView.statsPeriod}
             />
           </Layout.Main>
-          <Layout.Side>
-            <UserStats
-              organization={organization}
-              location={location}
-              eventView={eventView}
-            />
-            <SidebarCharts organization={organization} eventView={eventView} />
-            <Tags
-              generateUrl={this.generateTagUrl}
-              totalValues={totalValues}
-              eventView={eventView}
-              organization={organization}
-              location={location}
-            />
-          </Layout.Side>
         </Layout.Body>
       </React.Fragment>
     );
@@ -155,7 +101,7 @@ class SummaryContent extends React.Component<Props, State> {
 }
 
 const StyledSearchBar = styled(SearchBar)`
-  margin-bottom: ${space(1)};
+  margin-bottom: ${space(3)};
 `;
 
-export default withProjects(SummaryContent);
+export default RumContent;
